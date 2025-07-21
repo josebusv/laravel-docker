@@ -1,0 +1,138 @@
+services:
+  # Servidor Web (Nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx
+    # Se recomienda 'always' en desarrollo para asegurar que siempre se reinicie.
+    restart: always 
+    ports:
+      - "80:80"
+      # Si no usas SSL/HTTPS en desarrollo, puedes comentar o quitar el puerto 443.
+      # - "443:443" 
+    volumes:
+      # Asegúrate que la ruta './projects' contenga tu aplicación Laravel.
+      - ./projects:/var/www/html 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      # Si no usas SSL/HTTPS, puedes comentar o quitar este volumen.
+      # - ./nginx/ssl:/etc/nginx/ssl 
+    depends_on:
+      php:
+        # 'service_healthy' es preferible a 'service_started' si el servicio PHP tiene un healthcheck.
+        condition: service_healthy 
+    networks:
+      - laravel
+    healthcheck:
+      # Asegúrate que tu aplicación Laravel tenga una ruta '/health-check' configurada.
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PHP-FPM
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: laravel_php
+    # Se recomienda 'always' en desarrollo.
+    restart: always 
+    volumes:
+      - ./projects:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+    networks:
+      - laravel
+    depends_on:
+      postgres:
+        condition: service_healthy # Esperar a que PostgreSQL esté saludable.
+      redis:
+        condition: service_healthy # Esperar a que Redis esté saludable.
+    healthcheck:
+      # Un healthcheck básico para PHP-FPM.
+      test: ["CMD", "php-fpm", "-t"] 
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL
+  postgres:
+    image: postgres:13
+    container_name: laravel_postgres
+    # Se recomienda 'always' en desarrollo.
+    restart: always 
+    environment:
+      POSTGRES_DB: laravel
+      POSTGRES_USER: laravel
+      POSTGRES_PASSWORD: laravel123
+      # PGDATA debe apuntar a la misma ruta que el volumen persistente.
+      PGDATA: /var/lib/postgresql/data/pgdata 
+    volumes:
+      # Se recomienda mapear el volumen para asegurar la persistencia de los datos.
+      - postgres_data:/var/lib/postgresql/data/pgdata 
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - laravel
+    healthcheck:
+      # Healthcheck para PostgreSQL.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"] 
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: laravel_redis
+    # Se recomienda 'always' en desarrollo.
+    restart: always 
+    ports:
+      - "6379:6379"
+    volumes:
+      # Asegúrate que el volumen esté correctamente mapeado para la persistencia de datos.
+      - redis_data:/data 
+    networks:
+      - laravel
+    healthcheck:
+      # Healthcheck para Redis.
+      test: ["CMD", "redis-cli", "ping"] 
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Adminer (Gestor de Base de Datos)
+  adminer:
+    image: adminer
+    container_name: laravel_adminer
+    # Se recomienda 'always' en desarrollo.
+    restart: always 
+    ports:
+      - "8080:8080"
+    networks:
+      - laravel
+    depends_on:
+      postgres:
+        condition: service_healthy # Esperar a que PostgreSQL esté saludable.
+
+  # Mailhog (Testing de emails)
+  mailhog:
+    image: mailhog/mailhog
+    container_name: laravel_mailhog
+    # Se recomienda 'always' en desarrollo.
+    restart: always 
+    ports:
+      - "1025:1025" # Puerto SMTP
+      - "8025:8025" # Interfaz Web
+    networks:
+      - laravel
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  laravel:
+    driver: bridge
