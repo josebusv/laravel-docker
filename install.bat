@@ -45,24 +45,31 @@ if not exist "php\Dockerfile" (
 )
 
 echo [4/5] Creando configuración default de Nginx...
-powershell -Command "Set-Content -Path 'nginx\conf.d\default.conf' -Value @'
-server {
-    listen 80 default_server;
-    server_name _;
-    root /var/www/html;
-    index index.html;
+REM Crear script temporal de PowerShell
+set "TMP_PS_SCRIPT=%TEMP%\nginx_default_conf.ps1"
+(
+    echo @'
+    echo server {
+    echo     listen 80 default_server^;
+    echo     server_name _^;
+    echo     root /var/www/html^;
+    echo     index index.html^;
+    echo.
+    echo     location /health-check {
+    echo         return 200 'Laravel Environment Ready'^;
+    echo         add_header Content-Type text/plain^;
+    echo     }
+    echo.
+    echo     location / {
+    echo         return 200 'Laravel Docker Environment - Use create-project.bat to create a project'^;
+    echo         add_header Content-Type text/plain^;
+    echo     }
+    echo }
+    echo '@ ^| Set-Content -Path 'nginx\conf.d\default.conf' -Encoding utf8
+) > "%TMP_PS_SCRIPT%"
 
-    location /health-check {
-        return 200 \"Laravel Environment Ready\";
-        add_header Content-Type text/plain;
-    }
-
-    location / {
-        return 200 \"Laravel Docker Environment - Use create-project.bat to create a project\";
-        add_header Content-Type text/plain;
-    }
-}
-'@ -Encoding Utf8"
+powershell -ExecutionPolicy Bypass -File "%TMP_PS_SCRIPT%"
+del "%TMP_PS_SCRIPT%"
 
 echo [5/5] Construyendo imágenes Docker...
 docker-compose build --no-cache php
