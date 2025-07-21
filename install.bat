@@ -62,7 +62,7 @@ echo         return 200 "Laravel Docker Environment - Use create-project.bat to 
 echo         add_header Content-Type text/plain;
 echo     }
 echo }
-) > nginx\conf.d\default.conf
+) | Out-File -FilePath nginx\conf.d\default.conf -Encoding utf8
 
 echo [5/5] Construyendo imágenes Docker...
 docker-compose build --no-cache php

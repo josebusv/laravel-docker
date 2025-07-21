@@ -36,7 +36,7 @@ echo         return 404 "No Laravel project configured. Use create-project.bat t
 echo         add_header Content-Type text/plain;
 echo     }
 echo }
-) > nginx\conf.d\default.conf
+) | Out-File -FilePath nginx\conf.d\default.conf -Encoding utf8
 
 echo [3/5] Iniciando servicios base...
 docker-compose up -d postgres redis

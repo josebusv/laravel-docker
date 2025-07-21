@@ -1,2 +1,5 @@
-/projects
-/nginx/conf.d/*
+projects/*/
+# Ignorar archivos de configuración de Nginx por proyecto
+nginx/conf.d/*.conf
+!nginx/conf.d/default.conf
+!nginx/conf.d/laravel-template.conf
