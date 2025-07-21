@@ -19,24 +19,24 @@ if not exist "nginx\ssl" mkdir nginx\ssl
 if not exist "postgres\init" mkdir postgres\init
 
 echo [2/5] Creando configuracion default de Nginx...
-(
-echo server {
-echo     listen 80 default_server;
-echo     server_name _;
-echo     root /var/www/html;
-echo     index index.html;
-echo.
-echo     location /health-check {
-echo         return 200 "OK";
-echo         add_header Content-Type text/plain;
-echo     }
-echo.
-echo     location / {
-echo         return 404 "No Laravel project configured. Use create-project.bat to create one.";
-echo         add_header Content-Type text/plain;
-echo     }
-echo }
-) | Out-File -FilePath nginx\conf.d\default.conf -Encoding utf8
+powershell -Command "Set-Content -Path 'nginx\conf.d\default.conf' -Value @'
+server {
+    listen 80 default_server;
+    server_name _;
+    root /var/www/html;
+    index index.html;
+
+    location /health-check {
+        return 200 \"OK\";
+        add_header Content-Type text/plain;
+    }
+
+    location / {
+        return 404 \"No Laravel project configured. Use create-project.bat to create one.\";
+        add_header Content-Type text/plain;
+    }
+}
+'@ -Encoding Utf8"
 
 echo [3/5] Iniciando servicios base...
 docker-compose up -d postgres redis
