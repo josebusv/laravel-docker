@@ -33,7 +33,7 @@ docker-compose exec php composer create-project laravel/laravel /var/www/html/%P
 
 REM Configurar permisos
 echo [2/6] Configurando permisos...
-docker-compose exec php chown -R www:www /var/www/html/%PROJECT_NAME%
+docker-compose exec php chown -R www-data:www-data /var/www/html/%PROJECT_NAME%
 docker-compose exec php chmod -R 755 /var/www/html/%PROJECT_NAME%
 docker-compose exec php chmod -R 775 /var/www/html/%PROJECT_NAME%/storage
 docker-compose exec php chmod -R 775 /var/www/html/%PROJECT_NAME%/bootstrap/cache
