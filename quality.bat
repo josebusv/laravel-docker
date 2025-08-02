@@ -1,3 +1,26 @@
+@echo off
+if "%1"=="" (
+    echo Uso: quality.bat nombre_proyecto
+    exit /b 1
+)
+set PROJECT_NAME=%1
+
+echo ============================================
+echo   ANALISIS DE CALIDAD PARA: %PROJECT_NAME%
+echo ============================================
+
+echo.
+echo Ejecutando PHPStan...
+docker-compose exec php composer --working-dir=/var/www/html/%PROJECT_NAME% analyse
+
+echo.
+echo Ejecutando PHP_CodeSniffer...
+docker-compose exec php composer --working-dir=/var/www/html/%PROJECT_NAME% cs
+
+echo.
+echo Analisis completado para %PROJECT_NAME%.
+pause
+
 # Laravel Docker Environment
 
 Este entorno te permite crear, registrar y administrar múltiples proyectos Laravel usando Docker en Windows, con herramientas integradas para desarrollo, depuración y calidad de código.
@@ -116,9 +139,8 @@ Incluye ejemplo de workflow para GitHub Actions en `.github/workflows/ci.yml` pa
   - `composer analyse`
   - `composer cs`
 - Puedes personalizar la configuración de Nginx y PHP en las carpetas `nginx` y `php`.
-- Puedes limitar el uso de recursos de los contenedores editando `docker-compose.yml` (ver comentarios en ese archivo).
 
 ---
 
 ¿Dudas o problemas?  
-Revisa los scripts `.bat` o abre un issue
+Revisa los scripts `.bat` o abre un issue en el

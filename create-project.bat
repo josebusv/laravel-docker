@@ -115,6 +115,18 @@ echo 127.0.0.1 %PROJECT_NAME%.local >> C:\Windows\System32\drivers\etc\hosts
 REM Recargar Nginx
 docker-compose exec nginx nginx -s reload
 
+REM Instalar herramientas de calidad de código
+echo [7/8] Instalando herramientas de calidad de código...
+docker-compose exec php composer require --dev --working-dir=/var/www/html/%PROJECT_NAME% phpstan/phpstan nunomaduro/larastan squizlabs/php_codesniffer
+
+REM Agregar scripts a composer.json
+echo [8/8] Agregando scripts a composer.json...
+powershell -Command ^
+    "$composer = Get-Content projects/%PROJECT_NAME%/composer.json | Out-String | ConvertFrom-Json; " ^
+    "$composer.scripts.analyse = 'phpstan analyse'; " ^
+    "$composer.scripts.cs = 'phpcs --standard=PSR12 app/'; " ^
+    "$composer | ConvertTo-Json -Depth 10 | Set-Content projects/%PROJECT_NAME%/composer.json -Encoding utf8"
+
 echo.
 echo ============================================
 echo     PROYECTO CREADO EXITOSAMENTE
@@ -135,5 +147,9 @@ echo docker-compose exec php php /var/www/html/%PROJECT_NAME%/artisan [comando]
 echo.
 echo Para instalar dependencias NPM:
 echo docker-compose exec php npm install --prefix /var/www/html/%PROJECT_NAME%
+echo.
+echo Para analizar la calidad del código:
+echo docker-compose exec php composer --working-dir=/var/www/html/%PROJECT_NAME% analyse
+echo docker-compose exec php composer --working-dir=/var/www/html/%PROJECT_NAME% cs
 echo.
 pause
