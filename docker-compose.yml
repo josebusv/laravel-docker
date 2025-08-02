@@ -28,6 +28,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    mem_limit: 256m
+    cpus: 0.50
 
   # PHP-FPM
   php:
@@ -53,6 +55,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    mem_limit: 512m
+    cpus: 1.0
 
   # PostgreSQL
   postgres:
@@ -80,6 +84,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    mem_limit: 512m
+    cpus: 0.50
 
   # Redis
   redis:
@@ -100,6 +106,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    mem_limit: 128m
+    cpus: 0.25
 
   # Adminer (Gestor de Base de Datos)
   adminer:
@@ -114,6 +122,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy # Esperar a que PostgreSQL esté saludable.
+    mem_limit: 128m
+    cpus: 0.25
 
   # Mailhog (Testing de emails)
   mailhog:
@@ -126,6 +136,8 @@ services:
       - "8025:8025" # Interfaz Web
     networks:
       - laravel
+    mem_limit: 128m
+    cpus: 0.25
 
 volumes:
   postgres_data:
