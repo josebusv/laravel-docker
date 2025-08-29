@@ -127,6 +127,13 @@ powershell -Command ^
     "$composer.scripts.cs = 'phpcs --standard=PSR12 app/'; " ^
     "$composer | ConvertTo-Json -Depth 10 | Set-Content projects/%PROJECT_NAME%/composer.json -Encoding utf8"
 
+REM Crear configuración Supervisor para queue
+echo [9/9] Configurando Supervisor...
+powershell -Command "(Get-Content php/supervisor/conf.d/template.conf) -replace '%%PROJECT_NAME%%', '%PROJECT_NAME%' | Out-File -FilePath php/supervisor/conf.d/%PROJECT_NAME%.conf -Encoding utf8NoBOM"
+REM Recargar Supervisor
+docker-compose exec php supervisorctl reread
+docker-compose exec php supervisorctl update
+
 echo.
 echo ============================================
 echo     PROYECTO CREADO EXITOSAMENTE

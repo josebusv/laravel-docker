@@ -1,4 +1,6 @@
+
 FROM php:8.0.30-fpm
+RUN mkdir -p /etc/supervisor/conf.d
 
 WORKDIR /var/www/html
 
@@ -16,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     nano \
     libssl-dev \
+    supervisor \
     && rm -rf /var/lib/apt/lists/* \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql \
@@ -35,12 +38,13 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
 # Configurar usuario www y permisos
 RUN usermod -u 1000 www-data
 
-# EXPLICACIÓN: Quita o comenta la siguiente línea si el folder 'php' solo contiene Dockerfile y php.ini,
-# y tu código Laravel se monta desde el volumen en docker-compose.yml.
-# COPY --chown=www:www . /var/www
+
+# Copiar configuración de Supervisor
+COPY supervisord.conf /etc/supervisor/supervisord.conf
+COPY supervisor/conf.d /etc/supervisor/conf.d
 
 # Exponer el puerto de PHP-FPM
 EXPOSE 9000
 
-# Comando de inicio
-CMD ["php-fpm"]
+# Comando de inicio: Supervisor gestiona php-fpm y los queues
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

@@ -21,34 +21,34 @@ if not exist "projects\%PROJECT_NAME%" (
 )
 
 REM Crear configuración de Nginx
-echo [1/5] Configurando Nginx...
+echo [1/6] Configurando Nginx...
 powershell -Command "(Get-Content nginx/conf.d/laravel-template.conf) -replace 'PROJECT_NAME', '%PROJECT_NAME%' | Out-File -FilePath nginx/conf.d/%PROJECT_NAME%.conf -Encoding utf8"
 
 REM Copiar .env de ejemplo si no existe
 if not exist "projects\%PROJECT_NAME%\.env" (
     if exist "projects\%PROJECT_NAME%\.env.example" (
         copy "projects\%PROJECT_NAME%\.env.example" "projects\%PROJECT_NAME%\.env"
-        echo [2/5] Archivo .env copiado desde .env.example
+        echo [2/6] Archivo .env copiado desde .env.example
     ) else (
-        echo [2/5] ADVERTENCIA: No existe .env ni .env.example. Debe crearlo manualmente.
+        echo [2/6] ADVERTENCIA: No existe .env ni .env.example. Debe crearlo manualmente.
     )
 ) else (
-    echo [2/5] Archivo .env ya existe.
+    echo [2/6] Archivo .env ya existe.
 )
 
 REM Ajustar permisos
-echo [3/5] Ajustando permisos...
+echo [3/6] Ajustando permisos...
 docker-compose exec php chown -R www-data:www-data /var/www/html/%PROJECT_NAME%
 docker-compose exec php chmod -R 755 /var/www/html/%PROJECT_NAME%
 docker-compose exec php chmod -R 775 /var/www/html/%PROJECT_NAME%/storage
 docker-compose exec php chmod -R 775 /var/www/html/%PROJECT_NAME%/bootstrap/cache
 
 REM Crear base de datos
-echo [4/5] Creando base de datos...
+echo [4/6] Creando base de datos...
 docker-compose exec postgres createdb -U laravel %PROJECT_NAME%_db
 
 REM Agregar entrada al archivo hosts
-echo [5/5] Agregando entrada al archivo hosts...
+echo [5/6] Agregando entrada al archivo hosts...
 findstr /C:"%PROJECT_NAME%.local" C:\Windows\System32\drivers\etc\hosts >nul 2>&1
 if errorlevel 1 (
     echo 127.0.0.1 %PROJECT_NAME%.local >> C:\Windows\System32\drivers\etc\hosts
@@ -56,6 +56,13 @@ if errorlevel 1 (
 ) else (
     echo Entrada ya existe.
 )
+
+REM Crear configuración Supervisor para queue
+echo [6/6] Configurando Supervisor...
+powershell -Command "(Get-Content php/supervisor/conf.d/template.conf) -replace '%%PROJECT_NAME%%', '%PROJECT_NAME%' | Out-File -FilePath php/supervisor/conf.d/%PROJECT_NAME%.conf -Encoding utf8NoBOM"
+REM Recargar Supervisor
+docker-compose exec php supervisorctl reread
+docker-compose exec php supervisorctl update
 
 REM Recargar Nginx
 docker-compose exec nginx nginx -s reload
