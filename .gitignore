@@ -3,6 +3,5 @@ projects/*/
 nginx/conf.d/*.conf
 !nginx/conf.d/default.conf
 !nginx/conf.d/laravel-template.conf
-projects/supervisor/conf.d/*/
-!projects/supervisor/conf.d/default.conf
-!projects/supervisor/conf.d/laravel-template.conf
+projects/supervisor/conf.d/
+!projects/supervisor/conf.d/template.conf
