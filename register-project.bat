@@ -59,7 +59,7 @@ if errorlevel 1 (
 
 REM Crear configuración Supervisor para queue
 echo [6/6] Configurando Supervisor...
-powershell -Command "(Get-Content php/supervisor/conf.d/template.conf) -replace '%%PROJECT_NAME%%', '%PROJECT_NAME%' | Out-File -FilePath php/supervisor/conf.d/%PROJECT_NAME%.conf -Encoding utf8NoBOM"
+powershell -Command "(Get-Content php/supervisor/conf.d/template.conf) -replace '%%PROJECT_NAME%%', '%PROJECT_NAME%' | Out-File -FilePath php/supervisor/conf.d/%PROJECT_NAME%.conf -Encoding utf8"
 REM Recargar Supervisor
 docker-compose exec php supervisorctl reread
 docker-compose exec php supervisorctl update
