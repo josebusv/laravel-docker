@@ -1,8 +1,11 @@
 projects/*/
-projects/supervisor/conf.d/
+php/supervisor/conf.d/*/
 # Ignorar archivos de configuración de Nginx por proyecto
 nginx/conf.d/*.conf
 !nginx/conf.d/default.conf
 !nginx/conf.d/laravel-template.conf
 !projects/supervisor/conf.d/template.conf
 php/supervisor/conf.d/backend_axa_toma_pedidos.conf
+php/supervisor/conf.d/apitms.conf
+php/supervisor/conf.d/cst.conf
+php/supervisor/conf.d/reportes.conf
