@@ -39,6 +39,9 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
 RUN usermod -u 1000 www-data
 
 
+# Crear carpeta necesaria para Supervisor
+RUN mkdir -p /var/www/html/api-comedica/storage/logs
+
 # Copiar configuración de Supervisor
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY supervisor/conf.d /etc/supervisor/conf.d
