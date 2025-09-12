@@ -1639,3 +1639,19 @@
 2025-09-12 22:55:55,440 WARN received SIGQUIT indicating exit request
 2025-09-12 22:55:55,538 INFO waiting for queues_horizon-horizon_00 to die
 2025-09-12 22:55:55,555 INFO stopped: queues_horizon-horizon_00 (terminated by SIGTERM)
+2025-09-12 22:55:59,459 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-09-12 22:55:59,460 INFO Included extra file "/etc/supervisor/conf.d/queues_horizon.conf" during parsing
+2025-09-12 22:55:59,471 INFO RPC interface 'supervisor' initialized
+2025-09-12 22:55:59,473 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2025-09-12 22:55:59,478 INFO supervisord started with pid 1
+2025-09-12 22:56:00,484 INFO spawned: 'php-fpm' with pid 13
+2025-09-12 22:56:00,490 INFO spawned: 'queues_horizon-horizon_00' with pid 14
+2025-09-12 22:56:00,512 INFO exited: php-fpm (exit status 78; not expected)
+2025-09-12 22:56:01,515 INFO spawned: 'php-fpm' with pid 15
+2025-09-12 22:56:01,516 INFO success: queues_horizon-horizon_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-09-12 22:56:01,544 INFO exited: php-fpm (exit status 78; not expected)
+2025-09-12 22:56:03,548 INFO spawned: 'php-fpm' with pid 22
+2025-09-12 22:56:03,578 INFO exited: php-fpm (exit status 78; not expected)
+2025-09-12 22:56:06,583 INFO spawned: 'php-fpm' with pid 29
+2025-09-12 22:56:06,608 INFO exited: php-fpm (exit status 78; not expected)
+2025-09-12 22:56:06,848 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
