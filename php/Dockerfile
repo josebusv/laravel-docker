@@ -1,31 +1,30 @@
-
 FROM php:8.0.30-fpm
-RUN mkdir -p /etc/supervisor/conf.d
+COPY supervisord.conf /etc/supervisor/supervisord.conf
 
 WORKDIR /var/www/html
 
 # Instalar dependencias del sistema y extensiones PHP
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    libpq-dev \
-    postgresql-client \
-    nano \
-    libssl-dev \
-    supervisor \
-    && rm -rf /var/lib/apt/lists/* \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql \
-    && docker-php-ext-install mbstring exif pcntl bcmath gd zip \
-    # Instalar la extensión redis a través de PECL
-    && pecl install redis-5.3.7 || true \
-    && docker-php-ext-enable redis
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y git
+RUN apt-get install -y curl
+RUN apt-get install -y nano
+RUN apt-get install -y procps grep
+RUN apt-get install -y libssl-dev
+RUN apt-get install -y supervisor -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+RUN apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev libzip-dev libpq-dev
+RUN apt-get install -y libonig-dev
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY supervisor/conf.d/queues_horizon.conf /etc/supervisor/conf.d/queues_horizon.conf
+
+RUN docker-php-ext-install pdo pdo_pgsql pgsql
+RUN docker-php-ext-install mbstring exif pcntl bcmath
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install gd
+RUN docker-php-ext-install zip
+# Instalar la extensión redis a través de PECL
+RUN pecl install redis-5.3.7 || true
+RUN docker-php-ext-enable redis
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -37,17 +36,14 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
 
 # Configurar usuario www y permisos
 RUN usermod -u 1000 www-data
+RUN mkdir -p /var/www/html/queues_horizon/storage/logs
 
 
-# Crear carpeta necesaria para Supervisor
-RUN mkdir -p /var/www/html/api-comedica/storage/logs
 
-# Copiar configuración de Supervisor
-COPY supervisord.conf /etc/supervisor/supervisord.conf
-COPY supervisor/conf.d /etc/supervisor/conf.d
 
 # Exponer el puerto de PHP-FPM
 EXPOSE 9000
 
-# Comando de inicio: Supervisor gestiona php-fpm y los queues
+# Comando de inicio: Supervisor gestiona php-fpm y Horizon
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+
